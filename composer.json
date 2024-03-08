@@ -1,0 +1,24 @@
+{
+	"name": "ddprojects/schedule-api",
+	"autoload": {
+		"psr-4": {
+			"Api\\": "app/"
+		}
+	},
+	"authors": [
+		{
+			"name": "ddurov",
+			"email": "me@ddproj.ru"
+		}
+	],
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/ddurov/ddProjects-core",
+			"no-api": true
+		}
+	],
+	"require": {
+		"ddprojects/core": "dev-main"
+	}
+}

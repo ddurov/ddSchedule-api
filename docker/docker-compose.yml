@@ -1,0 +1,58 @@
+version: "3.8"
+services:
+  api:
+    build: php
+    env_file:
+      - ../.env
+    volumes:
+      - ../docker/logs/:/tmp/ddLogs/
+      - ../app/:/var/www/app/
+      - ../web/api/:/var/www/html/
+      - ../vendor/:/var/www/vendor/
+    links:
+      - db
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 1s
+        max_attempts: 10
+  panel:
+    image: httpd:2.4
+    restart: unless-stopped
+    volumes:
+      - ../web/panel/:/usr/local/apache2/htdocs/
+  db:
+    image: mysql:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+      - ../docker/database/:/docker-entrypoint-initdb.d/:ro
+  db-admin:
+    image: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+    links:
+      - db
+    depends_on:
+      - db
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - ${WEB_PROXY_ADMIN_PORT}:81
+    volumes:
+      - proxy-data:/data
+      - proxy-letsencrypt:/etc/letsencrypt
+volumes:
+  db-data:
+  proxy-data:
+  proxy-letsencrypt:
